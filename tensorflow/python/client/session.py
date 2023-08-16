@@ -53,24 +53,38 @@ class SessionInterface(object):
 
   @property
   def graph(self):
-    """The underlying TensorFlow graph, to be used in building Operations."""
+    """The underlying TensorFlow graph, to be used in building Operations.
+       返回会话所使用的 TensorFlow 计算图，用于构建操作。
+    """
     raise NotImplementedError('graph')
 
   @property
   def sess_str(self):
-    """The TensorFlow process to which this session will connect."""
+    """The TensorFlow process to which this session will connect.
+      返回会话所连接的 TensorFlow 进程的标识符。
+    """
     raise NotImplementedError('sess_str')
 
   def run(self, fetches, feed_dict=None, options=None, run_metadata=None):
-    """Runs operations in the session. See `BaseSession.run()` for details."""
+    """Runs operations in the session. See `BaseSession.run()` for details.
+      在会话中执行操作，并返回计算结果。这是会话的核心方法，它接受一系列的参数，
+      包括要获取的张量或操作(fetches), 要提供的输入数据(feed_dict),
+      可选的运行选项(options)和运行元数据(run_metadata)。
+    """
     raise NotImplementedError('run')
 
   def partial_run_setup(self, fetches, feeds=None):
-    """Sets up the feeds and fetches for partial runs in the session."""
+    """Sets up the feeds and fetches for partial runs in the session.
+      为部分运行设置要获取的张量或操作(fetches)和要提供的输入数据(feeds)。
+      部分运行是指在一个会话中分多次执行同一个计算图的一部分，以节省内存或提高效率。
+    """
     raise NotImplementedError('partial_run_setup')
 
   def partial_run(self, handle, fetches, feed_dict=None):
-    """Continues the execution with additional feeds and fetches."""
+    """Continues the execution with additional feeds and fetches.
+      继续执行部分运行，并返回计算结果。它接受一个之前由 partial_run_setup 返回的句柄(andle),
+      以及要获取的张量或操作(fetches)和要提供的输入数据(feed_dict)。
+    """
     raise NotImplementedError('partial_run')
 
 
@@ -655,6 +669,7 @@ class BaseSession(SessionInterface):
 
     self._closed = False
 
+    # target为要连接的tf执行引擎
     if target is not None:
       try:
         self._target = compat.as_bytes(target)
@@ -689,9 +704,11 @@ class BaseSession(SessionInterface):
           rewriter_config_pb2.RewriterConfig.ON):
       mixed_precision_global_state.non_mixed_precision_session_created = True
 
+    # config为session的配置信息
     self._config = config
     self._add_shapes = config.graph_options.infer_shapes
 
+    # 调用C层来创建session
     self._session = None
     opts = tf_session.TF_NewSessionOptions(target=self._target, config=config)
     try:
