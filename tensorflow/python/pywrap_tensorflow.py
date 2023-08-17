@@ -55,6 +55,7 @@ try:
     # override an RTLD_GLOBAL in _default_dlopen_flags).
     sys.setdlopenflags(_default_dlopen_flags | ctypes.RTLD_LOCAL)
 
+  # 加载tensorflow的.so文件，其中包含了底层操作的C接口
   from tensorflow.python.pywrap_tensorflow_internal import *
   from tensorflow.python.pywrap_tensorflow_internal import __version__
   from tensorflow.python.pywrap_tensorflow_internal import __git_version__

@@ -169,15 +169,16 @@ class Counter(Metric):
   This class encapsulates a set of values (or a single value for a label-less
   metric). Each value is identified by a tuple of labels. The class allows the
   user to increment each value.
+  这个类封装了一组值（或者一个没有标签的单个值）。每个值由一个标签元组来标识。这个类允许用户增加每个值。
   """
 
   def __init__(self, name, description, *labels):
     """Creates a new Counter.
 
     Args:
-      name: name of the new metric.
-      description: description of the new metric.
-      *labels: The label list of the new metric.
+      name: name of the new metric. 一个字符串，表示指标的名称，必须是唯一的。
+      description: description of the new metric. 一个字符串，表示指标的描述，用于文档化。
+      *labels: The label list of the new metric. 一个字符串列表，表示指标的标签，用于区分不同的维度。
     """
     super(Counter, self).__init__('Counter', _counter_methods, len(labels),
                                   name, description, *labels)
