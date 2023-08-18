@@ -40,12 +40,16 @@ class SessionInterface(object):
 
   @property
   def graph(self):
-    """The underlying TensorFlow graph, to be used in building Operations."""
+    """The underlying TensorFlow graph, to be used in building Operations.
+    返回底层的TensorFlow计算图,用于构建Operations。
+    """
     raise NotImplementedError('graph')
 
   @property
   def sess_str(self):
-    """The TensorFlow process to which this session will connect."""
+    """The TensorFlow process to which this session will connect.
+    返回这个Session要连接的TensorFlow进程。
+    """
     raise NotImplementedError('sess_str')
 
   def run(self, fetches, feed_dict=None, options=None, run_metadata=None):
@@ -53,11 +57,15 @@ class SessionInterface(object):
     raise NotImplementedError('run')
 
   def partial_run_setup(self, fetches, feeds=None):
-    """Sets up the feeds and fetches for partial runs in the session."""
+    """Sets up the feeds and fetches for partial runs in the session.
+    用于设置Graph部分运行
+    """
     raise NotImplementedError('partial_run_setup')
 
   def partial_run(self, handle, fetches, feed_dict=None):
-    """Continues the execution with additional feeds and fetches."""
+    """Continues the execution with additional feeds and fetches.
+    运行Graph部分运行
+    """
     raise NotImplementedError('partial_run')
 
 def _get_indexed_slices_value_from_fetches(fetched_vals):
@@ -522,6 +530,8 @@ class BaseSession(SessionInterface):
         creating the TensorFlow session.
       TypeError: If one of the arguments has the wrong type.
     """
+    # graph表示构建的图。TensorFlow的一个session会对应一个图。这个图包含了所有涉及到的算子
+    # graph如果没有设置（通常都不会设置），则使用默认graph
     if graph is None:
       self._graph = ops.get_default_graph()
     else:
@@ -534,6 +544,8 @@ class BaseSession(SessionInterface):
 
     self._current_version = 0
     self._extend_lock = threading.Lock()
+    
+    # target为要连接的tf执行引擎
     if target is not None:
       try:
         self._target = compat.as_bytes(target)
@@ -545,6 +557,7 @@ class BaseSession(SessionInterface):
     self._delete_lock = threading.Lock()
     self._dead_handles = []
 
+    # config为session的配置信息
     if config is not None:
       if not isinstance(config, config_pb2.ConfigProto):
         raise TypeError('config must be a tf.ConfigProto, but got %s'
@@ -555,6 +568,7 @@ class BaseSession(SessionInterface):
       self._config = None
       self._add_shapes = False
 
+    # 调用C层来创建session
     self._session = None
     opts = tf_session.TF_NewSessionOptions(target=self._target, config=config)
     try:
@@ -1289,6 +1303,7 @@ class Session(BaseSession):
         protocol buffer with configuration options for the session.
 
     """
+    # session创建的主要逻辑都在其父类BaseSession中
     super(Session, self).__init__(target, graph, config=config)
     # NOTE(mrry): Create these on first `__enter__` to avoid a reference cycle.
     self._default_graph_context_manager = None
