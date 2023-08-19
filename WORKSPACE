@@ -1,5 +1,6 @@
-workspace(name = "org_tensorflow")
+workspace(name = "org_tensorflow") # workspace名称
 
+# io_bazel_rules_closure 是一个用于构建和测试JavaScript、Java和Protocol Buffers的Bazel规则集
 http_archive(
     name = "io_bazel_rules_closure",
     sha256 = "a38539c5b5c358548e75b44141b4ab637bba7c4dc02b46b1f62a96d6433f56ae",
@@ -12,6 +13,11 @@ http_archive(
 
 load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
 
+'''
+该函数会下载和安装一些其他的外部依赖项，
+如Closure Library、Closure Compiler、Closure Templates等。
+这些依赖项是为了支持tensorflow的一些JavaScript相关的功能, 如TensorBoard5。
+'''
 closure_repositories()
 
 # We must check the bazel version before trying to parse any other BUILD

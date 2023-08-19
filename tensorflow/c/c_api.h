@@ -1337,7 +1337,7 @@ TF_CAPI_EXPORT extern unsigned char TF_TryEvaluateConstant(TF_Graph* graph,
 
 // --------------------------------------------------------------------------
 // API for driving Graph execution.
-
+// 将结构体定义别名，后面无需使用struct TF_Session定义变量，而直接使用TF_Session
 typedef struct TF_Session TF_Session;
 
 // Return a new execution session with the associated graph, or NULL on

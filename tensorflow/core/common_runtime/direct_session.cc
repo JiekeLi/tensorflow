@@ -140,6 +140,7 @@ string GetRendezvousKey(const string& tensor_name,
 
 }  // namespace
 
+// 本地Session构建工厂
 class DirectSessionFactory : public SessionFactory {
  public:
   DirectSessionFactory() {}
@@ -157,7 +158,7 @@ class DirectSessionFactory : public SessionFactory {
     std::vector<Device*> devices;
     TF_RETURN_IF_ERROR(DeviceFactory::AddDevices(
         options, "/job:localhost/replica:0/task:0", &devices));
-
+    // 构建本地Session对象
     DirectSession* session =
         new DirectSession(options, new DeviceMgr(devices), this);
     {
@@ -720,6 +721,7 @@ Status DirectSession::Run(const RunOptions& run_options,
   direct_session_runs->GetCell()->IncrementBy(1);
 
   // Extract the inputs names for this run of the session.
+  // 1 将输入tensor的name取出，组成一个列表，方便之后快速索引输入tensor
   std::vector<string> input_tensor_names;
   input_tensor_names.reserve(inputs.size());
   for (const auto& it : inputs) {

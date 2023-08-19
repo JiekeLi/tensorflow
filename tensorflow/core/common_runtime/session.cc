@@ -75,6 +75,7 @@ Status NewSession(const SessionOptions& options, Session** out_session) {
     LOG(ERROR) << s;
     return s;
   }
+  // 通过sessionFactory创建多态的Session。本地session为DirectSession，分布式为GRPCSession
   s = factory->NewSession(options, out_session);
   if (!s.ok()) {
     *out_session = nullptr;

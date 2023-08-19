@@ -1,5 +1,8 @@
 package(default_visibility = ["//visibility:public"])
 
+# filegroup 函数是一个通用的规则，它可以创建一个标签，用来引用一组文件或其他目标。
+# 这个 filegroup 可以被其他规则引用，例如 genrule 或 cc_binary。
+
 filegroup(
     name = "gcc",
     srcs = [

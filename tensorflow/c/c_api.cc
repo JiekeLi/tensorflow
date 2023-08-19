@@ -366,13 +366,16 @@ void TF_DeleteDeprecatedSession(TF_DeprecatedSession* s, TF_Status* status) {
   delete s;
 }
 
+// 增加节点到graph中，proto为序列化后的graph
 void TF_ExtendGraph(TF_DeprecatedSession* s, const void* proto,
                     size_t proto_len, TF_Status* status) {
   GraphDef g;
+  // 先将proto反序列化，得到client传递的graph，放入g中
   if (!tensorflow::ParseProtoUnlimited(&g, proto, proto_len)) {
     status->status = InvalidArgument("Invalid GraphDef");
     return;
   }
+  // 再调用session的extend方法。根据创建的不同session类型，多态调用不同方法。
   status->status = s->session->Extend(g);
 }
 
@@ -753,6 +756,7 @@ static bool TF_Run_Inputs(TF_Tensor* const* c_inputs,
   return true;
 }
 
+// 真正的实现了session.run()
 static void TF_Run_Helper(
     Session* session, const char* handle, const TF_Buffer* run_options,
     // Input tensors
@@ -768,6 +772,7 @@ static void TF_Run_Helper(
 
   if (handle == nullptr) {
     RunOptions run_options_proto;
+   
     if (run_options != nullptr && !run_options_proto.ParseFromArray(
                                       run_options->data, run_options->length)) {
       status->status = InvalidArgument("Unparseable RunOptions proto");
@@ -780,6 +785,7 @@ static void TF_Run_Helper(
     }
 
     RunMetadata run_metadata_proto;
+     // 调用不同的session实现类的run方法，来执行
     result = session->Run(run_options_proto, input_pairs, output_tensor_names,
                           target_oper_names, &outputs, &run_metadata_proto);
 
@@ -811,13 +817,13 @@ static void TF_Run_Helper(
 }
 
 extern "C" {
-
+// session.run()的C层实现
 void TF_Run(TF_DeprecatedSession* s, const TF_Buffer* run_options,
-            // Input tensors
+            // Input tensors 输入的数据tensor
             const char** c_input_names, TF_Tensor** c_inputs, int ninputs,
-            // Output tensors
+            // Output tensors 运行计算后输出的数据tensor
             const char** c_output_names, TF_Tensor** c_outputs, int noutputs,
-            // Target nodes
+            // Target nodes 要运行的节点
             const char** c_target_oper_names, int ntargets,
             TF_Buffer* run_metadata, TF_Status* status) {
   TF_Run_Setup(noutputs, c_outputs, status);
@@ -2484,18 +2490,21 @@ void TF_AddGradientsWithPrefix(TF_Graph* g, const char* prefix, TF_Output* y,
 }
 
 // TF_Session functions ----------------------------------------------
-
+// 定义TF_Session结构体的的构造函数
 TF_Session::TF_Session(tensorflow::Session* s, TF_Graph* g)
     : session(s), graph(g), last_num_graph_nodes(0), extend_before_run(true) {}
 
+// TF_NewSession创建session的新实现
 TF_Session* TF_NewSession(TF_Graph* graph, const TF_SessionOptions* opt,
                           TF_Status* status) {
   Session* session;
+  // 创建tensorflow::Session类对象
   status->status = NewSession(opt->options, &session);
   if (status->status.ok()) {
+    // 创建再封装一层的TF_Session结构体对性
     TF_Session* new_session = new TF_Session(session, graph);
     if (graph != nullptr) {
-      mutex_lock l(graph->mu);
+      mutex_lock l(graph->mu); 
       graph->sessions[new_session] = "";
     }
     return new_session;

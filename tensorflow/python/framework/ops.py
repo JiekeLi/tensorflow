@@ -2808,9 +2808,9 @@ class Graph(object):
     # Similarly, if one or more Session.run calls are going on, all mutate ops
     # have to wait until all Session.run calls have finished.
     self._group_lock = lock_util.GroupLock(num_groups=2)
-    self._nodes_by_id = dict()  # GUARDED_BY(self._lock)
+    self._nodes_by_id = dict()  # GUARDED_BY(self._lock) 为graph的每个op分配一个id，通过id可以快速索引到相关op。故创建了_nodes_by_id字典
     self._next_id_counter = 0  # GUARDED_BY(self._lock)
-    self._nodes_by_name = dict()  # GUARDED_BY(self._lock)
+    self._nodes_by_name = dict()  # GUARDED_BY(self._lock) 同时也可以通过name来快速索引op，故创建了_nodes_by_name字典
     self._version = 0  # GUARDED_BY(self._lock)
     # Maps a name used in the graph to the next id to use for that name.
     self._names_in_use = {}
@@ -2928,6 +2928,7 @@ class Graph(object):
       TypeError: if op is not an Operation or Tensor.
       ValueError: if the op.name or op._id are already used.
     """
+    # graph被设置为final后，就是只读的了，不能添加op了。
     self._check_not_finalized()
     if not isinstance(op, (Tensor, Operation)):
       raise TypeError("op must be a Tensor or Operation: %s" % op)
@@ -2939,6 +2940,7 @@ class Graph(object):
       if op.name in self._nodes_by_name:
         raise ValueError("cannot add op with name %s as that name "
                          "is already used" % op.name)
+       # 将op以id和name分别构建字典，添加到_nodes_by_id和_nodes_by_name字典中，方便后续快速索引
       self._nodes_by_id[op._id] = op
       self._nodes_by_name[op.name] = op
       self._version = max(self._version, op._id)

@@ -84,7 +84,9 @@ class Node {
   //   the actual assigned device, see assigned_device_name() below;
   // * def().attr() is authoritative.
   // TODO(irving): Replace with NodeInfo.
+  // NodeDef,节点算子Operation的信息，比如op分配到哪个设备上了，op的名字等，运行时有可能变化。
   const NodeDef& def() const;
+  // OpDef, 节点算子Operation的元数据，不会变的。比如Operation的入参列表，出参列表等
   const OpDef& op_def() const;
 
   // input and output types
@@ -248,7 +250,9 @@ class Node {
   int cost_id_;  // -1 if there is no corresponding cost accounting node
   NodeClass class_;
 
+  // 输入边，传递数据给节点。可能有多条
   EdgeSet in_edges_;
+  // 输出边，节点计算后得到的数据。可能有多条
   EdgeSet out_edges_;
 
   // NOTE(skyewm): inheriting from core::RefCounted may have a slight
@@ -344,10 +348,15 @@ class Edge {
 
   friend class EdgeSetTest;
   friend class Graph;
+  // 源节点, 边的数据就来源于源节点的计算。源节点是边的生产者
   Node* src_;
+  // 目标节点，边的数据提供给目标节点进行计算。目标节点是边的消费者
   Node* dst_;
+  // 边id，也就是边的标识符
   int id_;
+  // 表示当前边为源节点的第src_output_条边。源节点可能会有多条输出边
   int src_output_;
+  // 表示当前边为目标节点的第dst_input_条边。目标节点可能会有多条输入边。
   int dst_input_;
 };
 
@@ -621,9 +630,11 @@ class Graph {
   void ReleaseNode(Node* node);
 
   // Registry of all known ops, including functions.
+  // 所有已知的op计算函数的注册表
   FunctionLibraryDefinition ops_;
 
   // GraphDef versions
+  // GraphDef版本号
   const std::unique_ptr<VersionDef> versions_;
 
   // Allocator which will give us good locality.
@@ -631,19 +642,24 @@ class Graph {
 
   // Map from node ids to allocated nodes.  nodes_[id] may be nullptr if
   // the node with that id was removed from the graph.
+  // 节点node列表，通过id来访问
   std::vector<Node*> nodes_;
 
   // Number of nodes alive.
+  // node个数
   int64 num_nodes_ = 0;
 
   // Map from edge ids to allocated edges.  edges_[id] may be nullptr if
   // the edge with that id was removed from the graph.
+  // 边edge列表，通过id来访问
   std::vector<Edge*> edges_;
 
   // The number of entries in edges_ that are not nullptr.
+  // graph中非空edge的数目
   int num_edges_ = 0;
 
   // Allocated but free nodes and edges.
+  // 已分配了内存，但还没使用的node和edge
   std::vector<Node*> free_nodes_;
   std::vector<Edge*> free_edges_;
 

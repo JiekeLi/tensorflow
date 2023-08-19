@@ -45,24 +45,38 @@ class SessionInterface(object):
 
   @property
   def graph(self):
-    """The underlying TensorFlow graph, to be used in building Operations."""
+    """The underlying TensorFlow graph, to be used in building Operations.
+    用来返回底层的 TensorFlow 计算图,这个图可以用来构建操作
+    """
     raise NotImplementedError('graph')
 
   @property
   def sess_str(self):
-    """The TensorFlow process to which this session will connect."""
+    """The TensorFlow process to which this session will connect.
+    用来返回连接的 TensorFlow 进程的字符串表示
+    """
     raise NotImplementedError('sess_str')
 
   def run(self, fetches, feed_dict=None, options=None, run_metadata=None):
-    """Runs operations in the session. See `BaseSession.run()` for details."""
+    """Runs operations in the session. See `BaseSession.run()` for details.
+    它有一个 run 方法,用来在会话中执行操作和评估数据对象,这个方法接受四个参数:fetches, feed_dict, options, run_metadata。
+    fetches 是要执行或计算的操作或张量(Tensor)的列表,feed_dict 是一个字典,用来给占位符(placeholder)提供输入数据,
+    options 是一个 RunOptions 对象,用来指定运行时的选项,run_metadata 是一个 RunMetadata 对象,用来收集运行时的元数据。
+    """
     raise NotImplementedError('run')
 
   def partial_run_setup(self, fetches, feeds=None):
-    """Sets up the feeds and fetches for partial runs in the session."""
+    """Sets up the feeds and fetches for partial runs in the session.
+     partial_run_setup 方法,用来为部分运行(partial run)设置需要的 feeds 和 fetches。
+    部分运行是指在一次完整的 run 中分多次执行不同的 feeds 和 fetches
+    """
     raise NotImplementedError('partial_run_setup')
 
   def partial_run(self, handle, fetches, feed_dict=None):
-    """Continues the execution with additional feeds and fetches."""
+    """Continues the execution with additional feeds and fetches.
+    partial_run 方法,用来继续执行部分运行,这个方法接受三个参数:handle, fetches, feed_dict。
+    handle 是一个字符串,用来标识部分运行的状态,fetches 和 feed_dict 与 run 方法中的相同
+    """
     raise NotImplementedError('partial_run')
 
 
@@ -636,6 +650,8 @@ class BaseSession(SessionInterface):
         creating the TensorFlow session.
       TypeError: If one of the arguments has the wrong type.
     """
+    # graph表示构建的图。TensorFlow的一个session会对应一个图。这个图包含了所有涉及到的算子
+    # graph如果没有设置（通常都不会设置），则使用默认graph
     if graph is None:
       self._graph = ops.get_default_graph()
     else:
@@ -648,6 +664,8 @@ class BaseSession(SessionInterface):
 
     self._current_version = 0
     self._extend_lock = threading.Lock()
+    
+    # target为要连接的tf执行引擎
     if target is not None:
       try:
         self._target = compat.as_bytes(target)
@@ -659,6 +677,7 @@ class BaseSession(SessionInterface):
     self._delete_lock = threading.Lock()
     self._dead_handles = []
 
+    # config为session的配置信息
     if config is not None:
       if not isinstance(config, config_pb2.ConfigProto):
         raise TypeError(
@@ -669,6 +688,7 @@ class BaseSession(SessionInterface):
       self._config = None
       self._add_shapes = False
 
+    # 调用C层来创建session
     self._session = None
     opts = tf_session.TF_NewSessionOptions(target=self._target, config=config)
     try:
@@ -1133,6 +1153,7 @@ class BaseSession(SessionInterface):
           feed_map[compat.as_bytes(subfeed_t.name)] = (subfeed_t, subfeed_val)
 
     # Create a fetch handler to take care of the structure of fetches.
+    # 创建fetch处理器fetch_handler
     fetch_handler = _FetchHandler(
         self._graph, fetches, feed_dict_tensor, feed_handles=feed_handles)
 
@@ -1142,16 +1163,21 @@ class BaseSession(SessionInterface):
     # are deleted when `movers` goes out of scope when this _run() ends.
     # TODO(yuanbyu, keveman): Revisit whether we should just treat feeding
     # of a handle from a different device as an error.
+    
+    # 经过不同类型的fetch_handler处理，得到最终的fetches和targets
+    # targets为要执行的operation，fetches为要执行的tensor
     _ = self._update_with_movers(feed_dict_tensor, feed_map)
     final_fetches = fetch_handler.fetches()
     final_targets = fetch_handler.targets()
     # We only want to really perform the run if fetches or targets are provided,
     # or if the call is a partial run that specifies feeds.
+    # 开始运行
     if final_fetches or final_targets or (handle and feed_dict_tensor):
       results = self._do_run(handle, final_targets, final_fetches,
                              feed_dict_tensor, options, run_metadata)
     else:
       results = []
+    # 输出结果到results中
     return fetch_handler.build_results(self, results)
 
   def make_callable(self, fetches, feed_list=None, accept_options=False):
@@ -1314,7 +1340,9 @@ class BaseSession(SessionInterface):
 
     def _run_fn(feed_dict, fetch_list, target_list, options, run_metadata):
       # Ensure any changes to the graph are reflected in the runtime.
+      # 将要运行的operation添加到graph中
       self._extend_graph()
+      # 执行一次运行run，会调用底层C来实现
       return self._call_tf_sessionrun(
           options, feed_dict, fetch_list, target_list, run_metadata)
 
@@ -1348,6 +1376,7 @@ class BaseSession(SessionInterface):
       raise type(e)(node_def, op, message)
 
   def _extend_graph(self):
+    # 将要运行的operation添加到graph中
     with self._graph._session_run_lock():  # pylint: disable=protected-access
       tf_session.ExtendSession(self._session)
 
