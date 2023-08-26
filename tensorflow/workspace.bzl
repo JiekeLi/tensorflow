@@ -113,6 +113,7 @@ def tf_workspace(path_prefix = "", tf_repo_name = ""):
         sha256 = "7dd09690ae7ca4551de3111d4a86b75b23ec17445f273d3c42bdcdc1c7b02e4e",
         strip_prefix = "abseil-cpp-48cd2c3f351ff188bc85684b84a91b6e6d17d896",
         urls = [
+            "http://localhost:8080/bazel_download/abseil-cpp-48cd2c3f351ff188bc85684b84a91b6e6d17d896.tar.gz",
             "https://mirror.bazel.build/github.com/abseil/abseil-cpp/archive/48cd2c3f351ff188bc85684b84a91b6e6d17d896.tar.gz",
             "https://github.com/abseil/abseil-cpp/archive/48cd2c3f351ff188bc85684b84a91b6e6d17d896.tar.gz",
         ],
@@ -266,8 +267,9 @@ def tf_workspace(path_prefix = "", tf_repo_name = ""):
         strip_prefix = "libpng-1.6.37",
         system_build_file = clean_dep("//third_party/systemlibs:png.BUILD"),
         urls = [
+            "http://localhost:8080/bazel_download/v1.6.37.tar.gz",
             "http://mirror.tensorflow.org/github.com/glennrp/libpng/archive/v1.6.37.tar.gz",
-            "https://github.com/glennrp/libpng/archive/v1.6.37.tar.gz",
+            "https://github.com/glennrp/libpng/archive/v1.6.37.tar.gz"
         ],
     )
 

@@ -31,6 +31,11 @@ JOB_COUNT="${JOB_COUNT:-$(get_job_count)}"
 
 cd tensorflow/contrib/makefile/downloads/protobuf
 
+
+cp -r "/workspaces/tensorflow-learning/tf_dependencies/googlemock/googlemock-release-1.7.0" /workspaces/tensorflow-learning/tensorflow/tensorflow/contrib/makefile/downloads/protobuf/gmock
+cp -r "/workspaces/tensorflow-learning/tf_dependencies/googletest/googletest-release-1.7.0" /workspaces/tensorflow-learning/tensorflow/tensorflow/contrib/makefile/downloads/protobuf/gmock/gtest
+echo "I am here $PWD"
+
 ./autogen.sh
 if [ $? -ne 0 ]
 then
