@@ -63,6 +63,10 @@
 # //tensorflow/tensorflow.bzl) will include the necessary symbols in binary
 # build targets.
 
+# 这个包中的所有规则的默认可见性是只对//tensorflow:internal
+# 和//tensorflow_models及其子包可见
+# subpackages 和 internal 的区别是，subpackages 允许当前包和其子包访问该包中的规则，
+# 而 internal 只允许当前包访问该包中的规则
 package(default_visibility = [
     "//tensorflow:internal",
     "//tensorflow_models:__subpackages__",
@@ -157,6 +161,8 @@ load(
     "mkl_deps",
 )
 
+# 导出了一个文件ops/ops.pbtxt，这个文件属于当前的包，可以被其他包引用
+# 如果没有指定visibility属性，这个文件对所有包都是可见的，即使当前包的默认可见性已经在package函数中指定了
 exports_files(["ops/ops.pbtxt"])
 
 # -----------------------------------------------------------------------------
