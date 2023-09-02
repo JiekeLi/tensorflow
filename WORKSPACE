@@ -1,5 +1,6 @@
 workspace(name = "org_tensorflow")
 
+# 这个被下载的包是一个Bazel的规则集，它提供了一套用于JavaScript开发的工具，包括编译器，库，模板和样式表
 http_archive(
     name = "io_bazel_rules_closure",
     sha256 = "a38539c5b5c358548e75b44141b4ab637bba7c4dc02b46b1f62a96d6433f56ae",
@@ -11,7 +12,8 @@ http_archive(
 )
 
 load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
-
+# 第二句代码是调用closure_repositories函数，它会进一步下载和加载一些其他的外部依赖库，
+# 比如Google的闭包库（Closure Library）和闭包编译器（Closure Compiler
 closure_repositories()
 
 # We must check the bazel version before trying to parse any other BUILD
